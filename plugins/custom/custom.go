@@ -82,3 +82,7 @@ func (p Plugin) Install(task plugins.Task) error {
 	log.Println(stdBuffer.String())
 	return err
 }
+
+func (p Plugin) Name() string {
+	return "custom"
+}

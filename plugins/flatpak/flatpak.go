@@ -59,3 +59,7 @@ func (p Plugin) Install(task plugins.Task) error {
 	return installCmd.Run()
 
 }
+
+func (p Plugin) Name() string {
+	return "flatpack"
+}

@@ -19,3 +19,7 @@ func (p Plugin) Check(task plugins.Task) (installed bool, err error) {
 func (p Plugin) Install(task plugins.Task) error {
 	return nil
 }
+
+func (p Plugin) Name() string {
+	return ""
+}

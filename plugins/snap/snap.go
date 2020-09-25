@@ -38,3 +38,7 @@ func (p Plugin) Install(task plugins.Task) error {
 	installCmd.Stdout = os.Stdout
 	return installCmd.Run()
 }
+
+func (p Plugin) Name() string {
+	return "snap"
+}

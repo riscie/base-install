@@ -55,3 +55,7 @@ func (p Plugin) Install(task plugins.Task) error {
 	fmt.Println(installCmd.Args)
 	return installCmd.Run()
 }
+
+func (p Plugin) Name() string {
+	return "yay"
+}
