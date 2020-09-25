@@ -33,14 +33,8 @@ func (p Plugin) Check(task plugins.Task) (installed bool, err error) {
 }
 
 // Install installs the `task.InstallPackage` via `snap` with the (optional) `task.InstallOption` flag 
-func (p Plugin) Install(task plugins.Task) (success bool, err error) {
-	success = false
+func (p Plugin) Install(task plugins.Task) error {
 	installCmd := exec.Command("sudo", "snap", "install", task.InstallPackage, task.InstallOption)
 	installCmd.Stdout = os.Stdout
-	err = installCmd.Run()
-
-	if err == nil {
-		success = true
-	}
-	return success, err
+	return installCmd.Run()
 }

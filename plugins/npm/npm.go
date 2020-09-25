@@ -37,8 +37,7 @@ func (p Plugin) Check(task plugins.Task) (installed bool, err error) {
 }
 
 // Install installs the `task.InstallPackage` globally via npm (without sudo)
-func (p Plugin) Install(task plugins.Task) (success bool, err error) {
-	success = false
+func (p Plugin) Install(task plugins.Task) error {
 	installCmd := exec.Command("npm", "install", "-g", task.InstallPackage)
 
 	var stdBuffer bytes.Buffer
@@ -47,12 +46,7 @@ func (p Plugin) Install(task plugins.Task) (success bool, err error) {
 	installCmd.Stdout = mw
 	installCmd.Stderr = mw
 
-	err = installCmd.Run()
-
+	err := installCmd.Run()
 	log.Println(stdBuffer.String())
-
-	if err == nil {
-		success = true
-	}
-	return success, err
+	return err
 }

@@ -53,14 +53,9 @@ func (p Plugin) Check(task plugins.Task) (installed bool, err error) {
 }
 
 // Install installs the `task.InstallPackage` via `flatpak` from the `task.InstallOption` repository
-func (p Plugin) Install(task plugins.Task) (success bool, err error) {
-	success = false
+func (p Plugin) Install(task plugins.Task) error {
 	installCmd := exec.Command("sudo", "flatpak", "install", "-y", task.InstallOption, task.InstallPackage)
 	installCmd.Stdout = os.Stdout
-	err = installCmd.Run()
+	return installCmd.Run()
 
-	if err == nil {
-		success = true
-	}
-	return success, err
 }

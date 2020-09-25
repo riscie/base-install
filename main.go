@@ -3,6 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+	"os/user"
+
 	"github.com/magbeat/base-install/plugins"
 	"github.com/magbeat/base-install/plugins/custom"
 	"github.com/magbeat/base-install/plugins/dnf"
@@ -12,10 +17,6 @@ import (
 	"github.com/magbeat/base-install/plugins/pacman"
 	"github.com/magbeat/base-install/plugins/snap"
 	"github.com/magbeat/base-install/plugins/yay"
-	"io/ioutil"
-	"log"
-	"os"
-	"os/user"
 )
 
 func main() {
@@ -67,7 +68,6 @@ func processTasks(tasks []plugins.Task) {
 	for _, task := range tasks {
 		fmt.Printf("[%s] Checking %s: ", task.Plugin, task.CheckValue)
 		installed := false
-		success := false
 		var err error
 		var plugin plugins.Plugin
 
@@ -101,15 +101,11 @@ func processTasks(tasks []plugins.Task) {
 			fmt.Println(" ... installed")
 		} else {
 			fmt.Println(" ... installing")
-			success, err = plugin.Install(task)
-			if success {
-				fmt.Println("... done")
+			err = plugin.Install(task)
+			if err != nil {
+				log.Fatalf("Error while installing %s with plugin %s\n%s", task.CheckValue, task.Plugin, err.Error())
 			}
-		}
-
-		if err != nil {
-			log.Printf("Error while checking %s with plugin %s", task.CheckValue, task.Plugin)
-			log.Printf(err.Error())
+			fmt.Println("... done")
 		}
 
 	}

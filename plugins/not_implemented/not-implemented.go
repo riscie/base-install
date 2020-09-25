@@ -5,7 +5,7 @@ package not_implemented
 
 import "github.com/magbeat/base-install/plugins"
 
-type Plugin struct {}
+type Plugin struct{}
 
 func NewNotImplementedPlugin() Plugin { return Plugin{} }
 
@@ -16,7 +16,6 @@ func (p Plugin) Check(task plugins.Task) (installed bool, err error) {
 }
 
 // Install always returns `true` for `success`
-func (p Plugin) Install(task plugins.Task) (success bool, err error) {
-	success = true
-	return success, err
+func (p Plugin) Install(task plugins.Task) error {
+	return nil
 }

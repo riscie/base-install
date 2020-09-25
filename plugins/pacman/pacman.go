@@ -50,14 +50,8 @@ func (p Plugin) Check(task plugins.Task) (installed bool, err error) {
 }
 
 // Install installs the `task.InstallPackage` via `pacman`
-func (p Plugin) Install(task plugins.Task) (success bool, err error) {
-	success = false
+func (p Plugin) Install(task plugins.Task) error {
 	installCmd := exec.Command("sudo", "pacman", "-S", task.InstallPackage, "--noconfirm")
 	fmt.Println(installCmd.Args)
-	err = installCmd.Run()
-
-	if err == nil {
-		success = true
-	}
-	return success, err
+	return installCmd.Run()
 }

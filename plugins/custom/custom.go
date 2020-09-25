@@ -68,7 +68,7 @@ func (p Plugin) Check(task plugins.Task) (installed bool, err error) {
 }
 
 // Install installs the package by joining the supplied commands with '&&' and running them in order via bash
-func (p Plugin) Install(task plugins.Task) (success bool, err error) {
+func (p Plugin) Install(task plugins.Task) error {
 	cmd := exec.Command("bash", "-c", strings.Join(task.Commands, " && "))
 
 	var stdBuffer bytes.Buffer
@@ -77,8 +77,8 @@ func (p Plugin) Install(task plugins.Task) (success bool, err error) {
 	cmd.Stdout = mw
 	cmd.Stderr = mw
 
-	err = cmd.Run()
+	err := cmd.Run()
 
 	log.Println(stdBuffer.String())
-	return success, err
+	return err
 }
