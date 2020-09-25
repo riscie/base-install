@@ -9,14 +9,6 @@ import (
 	"os/user"
 
 	"github.com/magbeat/base-install/plugins"
-	"github.com/magbeat/base-install/plugins/custom"
-	"github.com/magbeat/base-install/plugins/dnf"
-	"github.com/magbeat/base-install/plugins/flatpak"
-	"github.com/magbeat/base-install/plugins/not_implemented"
-	"github.com/magbeat/base-install/plugins/npm"
-	"github.com/magbeat/base-install/plugins/pacman"
-	"github.com/magbeat/base-install/plugins/snap"
-	"github.com/magbeat/base-install/plugins/yay"
 )
 
 func main() {
@@ -65,48 +57,44 @@ func parseTasks(configDir string) []plugins.Task {
 	return tasks
 }
 func processTasks(tasks []plugins.Task) {
+	ps := map[string]plugins.Plugin{
+		plugins.Dnf{}.Name():     plugins.Dnf{},
+		plugins.Snap{}.Name():    plugins.Snap{},
+		plugins.Flatpak{}.Name(): plugins.Flatpak{},
+		plugins.Custom{}.Name():  plugins.Custom{},
+		plugins.Npm{}.Name():     plugins.Npm{},
+		plugins.Yay{}.Name():     plugins.Yay{},
+		plugins.Pacman{}.Name():  plugins.Pacman{},
+	}
+
 	for _, task := range tasks {
 		fmt.Printf("[%s] Checking %s: ", task.Plugin, task.CheckValue)
 		installed := false
 		var err error
-		var plugin plugins.Plugin
 
-		switch task.Plugin {
-		case plugins.Dnf:
-			plugin = dnf.NewDnfPlugin()
-		case plugins.Snap:
-			plugin = snap.NewSnapPlugin()
-		case plugins.Flatpack:
-			plugin = flatpak.NewFlatpakPlugin()
-		case plugins.Custom:
-			plugin = custom.NewCustomPlugin()
-		case plugins.Npm:
-			plugin = npm.NewNpmPlugin()
-		case plugins.Pacman:
-			plugin = pacman.NewPacmanPlugin()
-		case plugins.Yay:
-			plugin = yay.NewYayPlugin()
-		default:
-			plugin = not_implemented.NewNotImplementedPlugin()
-		}
+		if plugin, ok := ps[task.Plugin]; ok {
+			fmt.Println("HERE")
+			plugin = plugin.New()
+			fmt.Println(plugin.Name())
+			installed, err = plugin.Check(task)
 
-		installed, err = plugin.Check(task)
-
-		if err != nil {
-			log.Printf("Error while checking %s with plugin %s", task.CheckValue, task.Plugin)
-			log.Printf(err.Error())
-		}
-
-		if installed {
-			fmt.Println(" ... installed")
-		} else {
-			fmt.Println(" ... installing")
-			err = plugin.Install(task)
 			if err != nil {
-				log.Fatalf("Error while installing %s with plugin %s\n%s", task.CheckValue, task.Plugin, err.Error())
+				log.Printf("Error while checking %s with plugin %s", task.CheckValue, task.Plugin)
+				log.Printf(err.Error())
 			}
-			fmt.Println("... done")
-		}
 
+			if installed {
+				fmt.Println(" ... installed")
+			} else {
+				fmt.Println(" ... installing")
+				err = plugin.Install(task)
+				if err != nil {
+					log.Fatalf("Error while installing %s with plugin %s\n%s", task.CheckValue, task.Plugin, err.Error())
+				}
+				fmt.Println("... done")
+			}
+		} else {
+			fmt.Println("nope")
+		}
 	}
 }

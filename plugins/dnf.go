@@ -8,11 +8,10 @@ Example Config file:
         { "plugin": "dnf", "check": "thunderbird", "installPackage": "thunderbird" }
     ]
  */
-package dnf
+package plugins
 
 import (
 	"bytes"
-	"github.com/magbeat/base-install/plugins"
 	"log"
 	"os"
 	"os/exec"
@@ -21,11 +20,11 @@ import (
 
 var installedPackages string
 
-type Plugin struct {
+type Dnf struct {
 	InstalledPackages string
 }
 
-func NewDnfPlugin() Plugin {
+func (p Dnf) New() Plugin {
 	if len(installedPackages) == 0 {
 		var buf bytes.Buffer
 
@@ -38,24 +37,24 @@ func NewDnfPlugin() Plugin {
 		}
 		installedPackages = string(buf.Bytes())
 	}
-	return Plugin{
+	return Dnf{
 		InstalledPackages: installedPackages,
 	}
 }
 
 // Check checks if `task.CheckValue` is installed by looking at the installed yum packages
-func (p Plugin) Check(task plugins.Task) (installed bool, err error) {
+func (p Dnf) Check(task Task) (installed bool, err error) {
 	installed = strings.Contains(p.InstalledPackages, task.CheckValue)
 	return installed, err
 }
 
 // Install installs the `task.InstallPackage` via `dnf` 
-func (p Plugin) Install(task plugins.Task) error {
+func (p Dnf) Install(task Task) error {
 	installCmd := exec.Command("sudo", "dnf", "install", "-y", task.InstallPackage)
 	installCmd.Stdout = os.Stdout
 	return installCmd.Run()
 }
 
-func (p Plugin) Name() string {
+func (p Dnf) Name() string {
 	return "dnf"
 }

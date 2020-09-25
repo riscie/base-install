@@ -8,23 +8,22 @@ Example Config file:
         { "plugin": "npm", "check": "ng", "installPackage": "@angular/cli" }
     ]
  */
-package npm
+package plugins
 
 import (
 	"bytes"
-	"github.com/magbeat/base-install/plugins"
 	"io"
 	"log"
 	"os"
 	"os/exec"
 )
 
-type Plugin struct{}
+type Npm struct{}
 
-func NewNpmPlugin() Plugin { return Plugin{} }
+func (p Npm) New() Plugin { return Npm{} }
 
 // Check checks if `task.CheckValue` is installed by looking up the binary
-func (p Plugin) Check(task plugins.Task) (installed bool, err error) {
+func (p Npm) Check(task Task) (installed bool, err error) {
 	_, lerr := exec.LookPath(task.CheckValue)
 
 	if lerr != nil {
@@ -37,7 +36,7 @@ func (p Plugin) Check(task plugins.Task) (installed bool, err error) {
 }
 
 // Install installs the `task.InstallPackage` globally via npm (without sudo)
-func (p Plugin) Install(task plugins.Task) error {
+func (p Npm) Install(task Task) error {
 	installCmd := exec.Command("npm", "install", "-g", task.InstallPackage)
 
 	var stdBuffer bytes.Buffer
@@ -51,6 +50,6 @@ func (p Plugin) Install(task plugins.Task) error {
 	return err
 }
 
-func (p Plugin) Name() string {
+func (p Npm) Name() string {
 	return "npm"
 }

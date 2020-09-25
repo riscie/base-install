@@ -8,11 +8,10 @@ Example Config file:
         { "plugin": "flatpak", "check": "Slack", "installPackage": "com.slack.Slack", "installOption": "flathub" }
     ]
 */
-package flatpak
+package plugins
 
 import (
 	"bytes"
-	"github.com/magbeat/base-install/plugins"
 	"log"
 	"os"
 	"os/exec"
@@ -21,11 +20,11 @@ import (
 
 var flatpakPackages string
 
-type Plugin struct {
+type Flatpak struct {
 	InstalledPackages string
 }
 
-func NewFlatpakPlugin() Plugin {
+func (p Flatpak) New() Plugin {
 	if len(flatpakPackages) == 0 {
 		var buf bytes.Buffer
 
@@ -41,25 +40,25 @@ func NewFlatpakPlugin() Plugin {
 		addRemoteCmd := exec.Command("flatpak", "remote-add", "--if-not-exists", "flathub", "https://flathub.org/repo/flathub.flatpakrepo")
 		err = addRemoteCmd.Run()
 	}
-	return Plugin{
+	return Flatpak{
 		InstalledPackages: flatpakPackages,
 	}
 }
 
 // Check checks if `task.CheckValue` is installed by looking at the installed flatpak packages
-func (p Plugin) Check(task plugins.Task) (installed bool, err error) {
+func (p Flatpak) Check(task Task) (installed bool, err error) {
 	installed = strings.Contains(p.InstalledPackages, task.CheckValue)
 	return installed, err
 }
 
 // Install installs the `task.InstallPackage` via `flatpak` from the `task.InstallOption` repository
-func (p Plugin) Install(task plugins.Task) error {
+func (p Flatpak) Install(task Task) error {
 	installCmd := exec.Command("sudo", "flatpak", "install", "-y", task.InstallOption, task.InstallPackage)
 	installCmd.Stdout = os.Stdout
 	return installCmd.Run()
 
 }
 
-func (p Plugin) Name() string {
+func (p Flatpak) Name() string {
 	return "flatpack"
 }

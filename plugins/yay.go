@@ -7,7 +7,7 @@ Example Config file:
         { "plugin": "yay", "check": "firefox", "installPackage": "firefox" }
     ]
 */
-package yay
+package plugins
 
 import (
 	"bytes"
@@ -15,18 +15,14 @@ import (
 	"log"
 	"os/exec"
 	"strings"
-
-	"github.com/magbeat/base-install/plugins"
 )
 
-var installedPackages string
 
-type Plugin struct {
+type Yay struct {
 	InstalledPackages string
 }
 
-func NewYayPlugin() Plugin {
-	if len(installedPackages) == 0 {
+func (p Yay) New() Plugin {
 		var buf bytes.Buffer
 
 		listCmd := exec.Command("yay", "-Q")
@@ -36,26 +32,26 @@ func NewYayPlugin() Plugin {
 		if err != nil {
 			log.Fatal("Could not read installed packages list")
 		}
-		installedPackages = string(buf.Bytes())
-	}
-	return Plugin{
+		installedPackages := string(buf.Bytes())
+
+	return Yay{
 		InstalledPackages: installedPackages,
 	}
 }
 
 // Check checks if `task.CheckValue` is installed by looking at the installed Yay packages
-func (p Plugin) Check(task plugins.Task) (installed bool, err error) {
+func (p Yay) Check(task Task) (installed bool, err error) {
 	installed = strings.Contains(p.InstalledPackages, task.CheckValue)
 	return installed, err
 }
 
 // Install installs the `task.InstallPackage` via `yay`
-func (p Plugin) Install(task plugins.Task) error {
+func (p Yay) Install(task Task) error {
 	installCmd := exec.Command("yay", "-S", task.InstallPackage, "--noconfirm")
 	fmt.Println(installCmd.Args)
 	return installCmd.Run()
 }
 
-func (p Plugin) Name() string {
+func (p Yay) Name() string {
 	return "yay"
 }

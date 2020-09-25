@@ -15,11 +15,10 @@ Example Config file:
         }
     ]
  */
-package custom
+package plugins
 
 import (
 	"bytes"
-	"github.com/magbeat/base-install/plugins"
 	"io"
 	"log"
 	"os"
@@ -27,31 +26,31 @@ import (
 	"strings"
 )
 
-type Plugin struct{}
+type Custom struct{}
 
-func NewCustomPlugin() Plugin { return Plugin{} }
+func (p Custom) New() Plugin { return Custom{} }
 
 // Check determines if a package `task.CheckValue` is installed by one the following methods (`task.CheckType`):
 // - binary: binary is in $PATH
 // - directory: if directory or file exists
 // - yum: if package is installed via yum / dnf
-func (p Plugin) Check(task plugins.Task) (installed bool, err error) {
+func (p Custom) Check(task Task) (installed bool, err error) {
 	switch task.CheckType {
-	case plugins.Binary:
+	case Binary:
 		_, lookPathErr := exec.LookPath(task.CheckValue)
 		if lookPathErr != nil {
 			installed = false
 		} else {
 			installed = true
 		}
-	case plugins.Directory:
+	case Directory:
 		path := os.ExpandEnv(task.CheckValue)
 		if _, err := os.Stat(path); !os.IsNotExist(err) {
 			installed = true
 		} else {
 			installed = false
 		}
-	case plugins.Yum:
+	case Yum:
 		var buf bytes.Buffer
 
 		listCmd := exec.Command("yum", "list", "installed")
@@ -68,7 +67,7 @@ func (p Plugin) Check(task plugins.Task) (installed bool, err error) {
 }
 
 // Install installs the package by joining the supplied commands with '&&' and running them in order via bash
-func (p Plugin) Install(task plugins.Task) error {
+func (p Custom) Install(task Task) error {
 	cmd := exec.Command("bash", "-c", strings.Join(task.Commands, " && "))
 
 	var stdBuffer bytes.Buffer
@@ -83,6 +82,6 @@ func (p Plugin) Install(task plugins.Task) error {
 	return err
 }
 
-func (p Plugin) Name() string {
+func (p Custom) Name() string {
 	return "custom"
 }
